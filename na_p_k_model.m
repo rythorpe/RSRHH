@@ -68,10 +68,10 @@ k_n=7;
 I_base=7; % baseline injected current
 
 % Nullclines
-vVec=(-90:20); % vector spanning voltage values (v-dimension)
-nVec=(0:0.01:0.7); % vector spanning n-gate values (n-dimension)
-v_null = (I-g_l*(vVec-E_l)-g_na/(1+exp((vh_m-vVec)/k_m))*(v-E_na))/(g_k*(vVec-E_k);
-
+vVec=(-90:0.1:20); % vector spanning voltage values (v-dimension)
+%nVec=((0.7/numel(vVec)):(0.7/numel(vVec)):0.7); % vector spanning n-gate values (n-dimension)
+v_null = (I_base-g_l*(vVec-E_l)-g_na./(1+exp((vh_m-vVec)/k_m)).*(vVec-E_na))./(g_k*(vVec-E_k));
+n_null = 1./(1+exp((vh_n-vVec)/k_n));
 
 T=50; % total time
 dt=0.1; % simulation time-step (ms)

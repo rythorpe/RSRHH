@@ -1,4 +1,4 @@
-clear all;
+clear all; close all;
 
 %% Integrator: postinhibitory spike
 % persistent sodium plus potassium model
@@ -67,12 +67,23 @@ k_m=15; % sigma function slope factor (m-gate)
 k_n=7;
 I_base=7; % baseline injected current
 
-% Nullclines
+% Nullclines and vector field
 vVec=(-90:0.1:20); % vector spanning voltage values (v-dimension)
 %nVec=((0.7/numel(vVec)):(0.7/numel(vVec)):0.7); % vector spanning n-gate values (n-dimension)
 v_null = (I_base-g_l*(vVec-E_l)-g_na./(1+exp((vh_m-vVec)/k_m)).*(vVec-E_na))./(g_k*(vVec-E_k));
 n_null = 1./(1+exp((vh_n-vVec)/k_n));
+figure
+plot(vVec,v_null,'k:',vVec,n_null,'k-.')
+axis([vVec(1) vVec(end) 0 0.7])
+legend('V-nullcline','n-nullcline')
+axes('Position',[.58 .2 .18 .18])
+box on
+plot(vVec,v_null,'k:',vVec,n_null,'k-.')
+axis([vVec(find(vVec>=-65,1,'first')) vVec(find(vVec<=-55,1,'last')) 0.01 0.05])
+box off
 
+
+% Simulation
 T=50; % total time
 dt=0.1; % simulation time-step (ms)
 tVec=(dt:dt:T); % time vector

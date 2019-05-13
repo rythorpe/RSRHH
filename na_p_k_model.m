@@ -127,10 +127,10 @@ figure
 yyaxis left
 plot(tVec,v)
 ylabel('potential, V (mV)')
-axis([0 max(tVec) min(v)-3/10*(max(v)-min(v)) max(v)+1/10*(max(v)-min(v))])
+axis([0 max(tVec) min(v)-0.15/0.80*(max(v)-min(v)) max(v)+0.05/0.80*(max(v)-min(v))])
 yyaxis right
 plot(tVec,I)
-axis([0 max(tVec) min(I)-1/2*(max(I)-min(I)) max(I)+8*(max(I)-min(I))])
+axis([0 max(tVec) min(I)-0.05/0.05*(max(I)-min(I)) max(I)+0.90/0.05*(max(I)-min(I))])
 yticks(unique(I))
 ylabel('injected current, I ({\mu}A/cm^2)')
 xlabel('time (ms)')

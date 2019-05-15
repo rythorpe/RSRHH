@@ -16,16 +16,10 @@ k_m=15; % sigma function slope factor (m-gate)
 k_n=7;
 I_base=5; % baseline injected current
 
-p=[-31.64,-31.55,-31.55,-31.70,-31.70;-79.42,-79.40,-79.44,-79.40,-79.44];
-x_traj=[-56,-57,-58,-59.5];
+x_traj=[-56,-57,-58,-59.5]; % x-coordinates for initial trajectories in each plot
 figure
 for i=1:4
-    
-%     vh_n = p(1,i);
-%     E_l = p(2,i);
     % Compute nullclines and vector field
-    %vVec=(-90:0.001:20); % vector spanning voltage values (v-dimension)
-    %nVec=(0:0.001:0.7)'; % vector spanning n-gate values (n-dimension)
     vVec=(-70:0.01:-40); % vector spanning voltage values (v-dimension)
     nVec=(0.01:0.0001:0.3)'; % vector spanning n-gate values (n-dimension)
     [X,Y]=meshgrid(vVec,nVec); % create 2D grid of downsampled values
@@ -34,16 +28,13 @@ for i=1:4
     v_null = (I_base-g_l*(vVec-E_l)-g_na./(1+exp((vh_m-vVec)/k_m)).*(vVec-E_na))./(g_k*(vVec-E_k)); % v-nullcline
     n_null = 1./(1+exp((vh_n-vVec)/k_n)); % n-nullcline
     
-    
-%     sorted = vVec(sort(abs(v_null-n_null)))
-%     fixed_inds = find(abs(v_null-n_null)<0.000003); % indices of fixed pts
+    % find fixed points
     win = [-58.4,-58.3;-57.9,-57.6;-43,-42];
     for fixed_i=1:3
         win_inds=[find(vVec>win(fixed_i,1),1,'first'),find(vVec<win(fixed_i,2),1,'last')];
         [B,dist_inds] = sort(abs(v_null(win_inds)-n_null(win_inds)));
         fixed_inds(fixed_i) = win_inds(dist_inds(1));
     end
-    
     
     % set trajectory starting points
     startx=x_traj(i)*ones(1,35);
@@ -63,6 +54,7 @@ for i=1:4
     xlabel('membrane potential, V (mV)')
     ylabel('K^+ activation, n')
     
+    % plot nullclines and trajectories zoomed in near lower equilibria
     subplot(4,2,i*2)
     plot(vVec,v_null,'k:',vVec,n_null,'k-.')
     hold on
@@ -73,39 +65,3 @@ for i=1:4
     xlabel('membrane potential, V (mV)')
     ylabel('K^+ activation, n')
 end
-
-% % Simulation
-% T=50; % total time
-% dt=0.1; % simulation time-step (ms)
-% tVec=(dt:dt:T); % time vector
-% numTime=length(tVec); % number of timepoints
-% 
-% % inital values in phase-space
-% v=-59.5*ones(1,numTime);
-% n=0.02*ones(1,numTime);
-% 
-% % injected current
-% I=I_base*ones(1,numTime); % baseline injected current
-% p_w=round(5/dt); % pulse width
-% I(round(10/dt):round(10/dt)+p_w)=-10;% pulse of input DC current
-% 
-% % forward Euler method
-% for i=1:numTime-1
-%     m_inf = 1/(1+exp((vh_m-v(i))/k_m));
-%     n_inf = 1/(1+exp((vh_n-v(i))/k_n));
-%     n(i+1) = n(i)+dt*(n_inf-n(i));
-%     v(i+1) = v(i)+dt*(I(i)-g_l*(v(i)-E_l)-g_na*m_inf*(v(i)-E_na)-g_k*n(i)*(v(i)-E_k));
-% end
-% 
-% % plot spiking results
-% figure
-% yyaxis left
-% plot(tVec,v)
-% ylabel('potential, V (mV)')
-% axis([0 max(tVec) min(v)-0.15/0.80*(max(v)-min(v)) max(v)+0.05/0.80*(max(v)-min(v))])
-% yyaxis right
-% plot(tVec,I)
-% axis([0 max(tVec) min(I)-0.05/0.05*(max(I)-min(I)) max(I)+0.90/0.05*(max(I)-min(I))])
-% yticks(unique(I))
-% ylabel('injected current, I ({\mu}A/cm^2)')
-% xlabel('time (ms)')

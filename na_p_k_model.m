@@ -212,7 +212,8 @@ h=quiver(X,Y,v_dot,n_dot,'AutoScaleFactor',2); % downsample vVec and plot vector
 hs = get(h,'MaxHeadSize');
 set(h,'MaxHeadSize',hs/1000)
 startx=[-60,-85,-55,-25,5,-85,-55,-25,5,-85,-55,-25,5,-85,-55,-25,5];
-starty=[0.04,0.6,0.6,0.6,0.6,0.4,0.4,0.4,0.4,0.2,0.2,0.2,0.2,0.01,0.01,0.01,0.01,];
+starty=[0.04,0.6,0.6,0.6,0.6,0.4,0.4,0.4,0.4,...
+    0.2,0.2,0.2,0.2,0.01,0.01,0.01,0.01,];
 streamline(X,Y,v_dot,n_dot,startx,starty)
 hold off
 title('Transition (near BT) neuron')

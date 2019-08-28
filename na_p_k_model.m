@@ -67,21 +67,16 @@ hold off
 axis([vVec(find(vVec>=-61,1,'first')) vVec(find(vVec<=-54,1,'last')) 0.016 0.024])
 box off
 
-% inital values in phase-space
-v=-59.4*ones(1,numTime);
-n=0.017*ones(1,numTime);
+% % inital values in phase-space
+% v=-59.4*ones(1,numTime);
+% n=0.017*ones(1,numTime);
 
 % injected current
 I=I_base*ones(1,numTime); % baseline injected current
 I(pulse_inds)=I_base+0.68;% % add pulse current
 
-% forward Euler method
-for i=1:numTime-1
-    m_inf = 1/(1+exp((vh_m-v(i))/k_m));
-    n_inf = 1/(1+exp((vh_n-v(i))/k_n));
-    n(i+1) = n(i)+dt*(n_inf-n(i));
-    v(i+1)=v(i)+dt*(I(i)-g_l*(v(i)-E_l)-g_na*m_inf*(v(i)-E_na)-g_k*n(i)*(v(i)-E_k));
-end
+% run simulation
+[~,v] = sim_traj(0.017,-59.4,I,tVec,g_l,g_na,g_k,E_l,E_na,E_k,vh_m,vh_n,k_m,k_n);
 
 % plot spiking results
 figure
@@ -149,20 +144,15 @@ axis([vVec(find(vVec>=-65,1,'first')) vVec(find(vVec<=-55,1,'last')) 0.02 0.04])
 box off
 
 % inital values in phase-space
-v=-59.4*ones(1,numTime);
-n=0.02587*ones(1,numTime);
+% v=-59.4*ones(1,numTime);
+% n=0.02587*ones(1,numTime);
 
 % injected current
 I=I_base*ones(1,numTime); % baseline injected current
 I(pulse_inds)=I_base+1.9;% add pulse current
 
-% forward Euler method
-for i=1:numTime-1
-    m_inf = 1/(1+exp((vh_m-v(i))/k_m));
-    n_inf = 1/(1+exp((vh_n-v(i))/k_n));
-    n(i+1) = n(i)+dt*(n_inf-n(i));
-    v(i+1) = v(i)+dt*(I(i)-g_l*(v(i)-E_l)-g_na*m_inf*(v(i)-E_na)-g_k*n(i)*(v(i)-E_k));
-end
+% run simulation
+[~,v] = sim_traj(0.02587,-59.4,I,tVec,g_l,g_na,g_k,E_l,E_na,E_k,vh_m,vh_n,k_m,k_n);
 
 % plot spiking results
 figure
@@ -230,21 +220,16 @@ hold off
 axis([vVec(find(vVec>=-65,1,'first')) vVec(find(vVec<=-55,1,'last')) 0.02 0.04])
 box off
 
-% inital values in phase-space
-v=-58.396*ones(1,numTime);
-n=0.0214*ones(1,numTime);
+% % inital values in phase-space
+% v=-58.396*ones(1,numTime);
+% n=0.0214*ones(1,numTime);
 
 % injected current
 I=I_base*ones(1,numTime); % baseline injected current
 I((find(tVec>=10,1,'first'):find(tVec<=10+pw,1,'last')))=I_base+0.8;% add pulse current
 
-% forward Euler method
-for i=1:numTime-1
-    m_inf = 1/(1+exp((vh_m-v(i))/k_m));
-    n_inf = 1/(1+exp((vh_n-v(i))/k_n));
-    n(i+1) = n(i)+dt*(n_inf-n(i));
-    v(i+1) = v(i)+dt*(I(i)-g_l*(v(i)-E_l)-g_na*m_inf*(v(i)-E_na)-g_k*n(i)*(v(i)-E_k));
-end
+% run simulation
+[~,v] = sim_traj(0.0214,-58.396,I,tVec,g_l,g_na,g_k,E_l,E_na,E_k,vh_m,vh_n,k_m,k_n);
 
 % plot spiking results
 figure
@@ -259,3 +244,41 @@ yticks(unique(I))
 title('Transition (near BT) neuron')
 ylabel('injected current, I ({\mu}A/cm^2)')
 xlabel('time (ms)')
+
+
+function [n,v] = sim_traj(n_init, v_init, IVec, tVec, g_l, g_na, g_k, E_l, E_na, E_k, vh_m, vh_n, k_m, k_n)
+    % Runge-Kutta method simulation
+    dt = tVec(2)-tVec(1);
+    numTime = length(tVec);
+    n = n_init*ones(1,numTime);
+    v = v_init*ones(1,numTime);
+    
+    % RK4
+    for i=1:numTime-1
+        
+        [m_inf,n_inf] = update_consts(v(i),vh_m,k_m,vh_n,k_n);
+        n_1 = n(i)+dt/2*(n_inf-n(i));
+        v_1 = v(i)+dt/2*(IVec(i)-g_l*(v(i)-E_l)-g_na*m_inf*(v(i)-E_na)-g_k*n(i)*(v(i)-E_k));
+
+        [m_inf,n_inf] = update_consts(v_1,vh_m,k_m,vh_n,k_n);
+        n_2 = n(i)+dt/2*(n_inf-n_1);
+        v_2 = v(i)+dt/2*(IVec(i)-g_l*(v_1-E_l)-g_na*m_inf*(v_1-E_na)-g_k*n_1*(v_1-E_k));
+
+        [m_inf,n_inf] = update_consts(v_2,vh_m,k_m,vh_n,k_n);
+        n_3 = n(i)+dt*(n_inf-n_2);
+        v_3 = v(i)+dt*(IVec(i)-g_l*(v_2-E_l)-g_na*m_inf*(v_2-E_na)-g_k*n_2*(v_2-E_k));
+
+        [m_inf,n_inf] = update_consts(v_3,vh_m,k_m,vh_n,k_n);
+        n_4 = n(i)+dt*(n_inf-n_3);
+        v_4 = v(i)+dt*(IVec(i)-g_l*(v_3-E_l)-g_na*m_inf*(v_3-E_na)-g_k*n_3*(v_3-E_k));
+
+        n(i+1) = n(i) + ([n_1,n_2,n_3,n_4]-n(i))*[1/3;2/3;1/3;1/6];
+        v(i+1) = v(i) + ([v_1,v_2,v_3,v_4]-v(i))*[1/3;2/3;1/3;1/6];
+    end
+end
+
+function [m_inf,n_inf] = update_consts(v, vh_m, k_m, vh_n, k_n)
+    m_inf = 1/(1+exp((vh_m-v)/k_m));
+    n_inf = 1/(1+exp((vh_n-v)/k_n));
+end
+
